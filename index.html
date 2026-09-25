@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instagram Hacker Pro</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', monospace; }
+  
+  body {
+    background: #000;
+    color: #0f0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Matrix Rain Canvas */
+  #matrix {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    opacity: 0.25;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 720px;
+    background: rgba(5, 10, 5, 0.95);
+    border: 2px solid #0f0;
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 0 40px #0f0, inset 0 0 30px rgba(0,255,0,0.08);
+    backdrop-filter: blur(4px);
+  }
+
+  h1 {
+    text-align: center;
+    color: #0f0;
+    font-size: 24px;
+    text-shadow: 0 0 15px #0f0, 0 0 30px #0f0;
+    letter-spacing: 3px;
+    animation: flicker 3s infinite;
+  }
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.4; }
+    94% { opacity: 1; }
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #080;
+    font-size: 12px;
+    margin: 6px 0 22px;
+    letter-spacing: 1px;
+  }
+
+  /* Status bar */
+  .statusbar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #0a0;
+    border-bottom: 1px solid #0f03;
+    padding-bottom: 8px;
+    margin-bottom: 18px;
+  }
+  .statusbar span { animation: blink 1.5s infinite; }
+  @keyframes blink { 50% { opacity: 0.4; } }
+
+  .input-group { margin-bottom: 16px; }
+  label {
+    display: block;
+    color: #0f0;
+    font-size: 13px;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  input[type="text"], input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    background: #000;
+    border: 1px solid #0f0;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    border-radius: 5px;
+    outline: none;
+    transition: 0.3s;
+  }
+  input:focus { box-shadow: 0 0 15px #0f0; }
+
+  .row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .row > * { flex: 1; }
+
+  button {
+    width: 100%;
+    padding: 15px;
+    background: #0f0;
+    color: #000;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    border-radius: 5px;
+    cursor: pointer;
+    letter-spacing: 3px;
+    transition: 0.3s;
+    text-transform: uppercase;
+  }
+  button:hover {
+    background: #000;
+    color: #0f0;
+    box-shadow: 0 0 25px #0f0;
+    border: 1px solid #0f0;
+  }
+  button:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+  /* Screens */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Terminal */
+  #terminal {
+    background: #000;
+    border: 1px solid #0f0;
+    border-radius: 6px;
+    padding: 16px;
+    height: 340px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.7;
+    margin-top: 15px;
+    box-shadow: inset 0 0 20px rgba(0,255,0,0.15);
+  }
+  #terminal::-webkit-scrollbar { width: 6px; }
+  #terminal::-webkit-scrollbar-thumb { background: #0f0; border-radius: 3px; }
+  #terminal::-webkit-scrollbar-track { background: #111; }
+
+  .log { margin-bottom: 3px; word-wrap: break-word; }
+  .log.ok { color: #0f0; font-weight: bold; }
+  .log.warn { color: #ff0; }
+  .log.err { color: #f33; }
+  .log.info { color: #0af; }
+  .log.critical { color: #f00; font-weight: bold; animation: blink 0.5s infinite; }
+  .cursor::after { content: '_'; animation: blink 0.7s infinite; }
+
+  /* Progress */
+  .progress-wrap { margin-top: 16px; }
+  .phase-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #0f0;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .progress-bar {
+    width: 100%;
+    height: 24px;
+    background: #111;
+    border: 1px solid #0f0;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #0f0, #0f8, #0f0);
+    background-size: 200% 100%;
+    animation: shine 1.5s linear infinite;
+    transition: width 0.4s;
+    box-shadow: 0 0 15px #0f0;
+  }
+  @keyframes shine {
+    0% { background-position: 0% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .progress-text {
+    text-align: center;
+    color: #0f0;
+    font-size: 13px;
+    margin-top: 6px;
+    letter-spacing: 2px;
+  }
+
+  /* Profile Reveal */
+  #profileReveal {
+    background: #000;
+    border: 1px solid #0f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 15px;
+    animation: pop 0.5s ease;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #0f03;
+  }
+  .profile-pic {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 3px solid #0f0;
+    box-shadow: 0 0 20px #0f0;
+    object-fit: cover;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: #0f0;
+  }
+  .profile-info h2 {
+    color: #0f0;
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .profile-info p {
+    color: #0a0;
+    font-size: 12px;
+  }
+  .stats {
+    display: flex;
+    justify-content: space-around;
+    padding: 16px 0;
+    border-bottom: 1px solid #0f03;
+  }
+  .stat { text-align: center; }
+  .stat .num {
+    color: #0f0;
+    font-size: 22px;
+    font-weight: bold;
+    text-shadow: 0 0 10px #0f0;
+  }
+  .stat .lbl {
+    color: #0a0;
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+  .data-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px dashed #0f02;
+  }
+  .data-row .key { color: #0af; }
+  .data-row .val { color: #0f0; }
+  .data-row .pass { color: #ff0; letter-spacing: 3px; }
+
+  /* Red Alert flash */
+  .flash-red {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 0, 0, 0.4);
+    z-index: 99;
+    pointer-events: none;
+    animation: redflash 0.6s ease;
+  }
+  @keyframes redflash {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* Final Reveal */
+  #finalReveal {
+    text-align: center;
+    padding: 30px 10px;
+    animation: pop 0.6s ease;
+  }
+  #finalReveal .emoji { font-size: 90px; animation: bounce 0.8s infinite; }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+  #finalReveal h2 {
+    color: #ff0;
+    font-size: 40px;
+    letter-spacing: 6px;
+    margin: 10px 0;
+    text-shadow: 0 0 25px #ff0, 0 0 50px #ff0;
+  }
+  #finalReveal p {
+    color: #0f0;
+    font-size: 15px;
+    line-height: 1.8;
+    margin: 6px 0;
+  }
+  #finalReveal .big {
+    color: #0af;
+    font-size: 18px;
+    margin-top: 20px;
+    letter-spacing: 2px;
+  }
+  .reset-btn {
+    background: #ff0;
+    color: #000;
+    margin-top: 25px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+  .reset-btn:hover {
+    background: #000;
+    color: #ff0;
+    border-color: #ff0;
+    box-shadow: 0 0 25px #ff0;
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 18px; }
+    h1 { font-size: 17px; letter-spacing: 1.5px; }
+    .profile-pic { width: 60px; height: 60px; font-size: 28px; }
+    #finalReveal h2 { font-size: 28px; letter-spacing: 3px; }
+    #finalReveal .emoji { font-size: 70px; }
+    #terminal { height: 260px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="wrapper">
+  <div class="container">
+
+    <!-- INPUT SCREEN -->
+    <div id="inputScreen" class="screen active">
+      <h1>⚡ INSTAGRAM HACKER PRO ⚡</h1>
+      <p class="subtitle">[ Advanced Penetration Suite v7.3 ]</p>
+
+      <div class="statusbar">
+        <span>● SYSTEM ONLINE</span>
+        <span id="clock">--:--:--</span>
+        <span>● TOR: ACTIVE</span>
+      </div>
+
+      <div class="input-group">
+        <label>🎯 TARGET USERNAME</label>
+        <input type="text" id="username" placeholder="@username" autocomplete="off">
+      </div>
+
+      <div class="row">
+        <div class="input-group">
+          <label>📷 TARGET PHOTO (optional)</label>
+          <input type="file" id="photo" accept="image/*">
+        </div>
+      </div>
+
+      <button id="startBtn">▶ INITIATE HACK</button>
+    </div>
+
+    <!-- HACK SCREEN -->
+    <div id="hackScreen" class="screen">
+      <h1 id="hackTitle">⚡ HACKING IN PROGRESS ⚡</h1>
+      <p class="subtitle">[ DO NOT CLOSE THIS WINDOW ]</p>
+
+      <div id="terminal"></div>
+
+      <div class="progress-wrap">
+        <div class="phase-label">
+          <span id="phaseName">PHASE 1: RECONNAISSANCE</span>
+          <span id="progressText">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE REVEAL -->
+    <div id="profileReveal" class="screen">
+      <div class="profile-header">
+        <div class="profile-pic" id="profilePic">👤</div>
+        <div class="profile-info">
+          <h2 id="revealUser">@target</h2>
+          <p>✔ ACCESS GRANTED — Full profile data</p>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="num" id="followers">0</div><div class="lbl">FOLLOWERS</div></div>
+        <div class="stat"><div class="num" id="following">0</div><div class="lbl">FOLLOWING</div></div>
+        <div class="stat"><div class="num" id="posts">0</div><div class="lbl">POSTS</div></div>
+      </div>
+
+      <div style="padding-top:14px;">
+        <div class="data-row"><span class="key">Email:</span><span class="val" id="emailVal">loading...</span></div>
+        <div class="data-row"><span class="key">Phone:</span><span class="val" id="phoneVal">loading...</span></div>
+        <div class="data-row"><span class="key">Password:</span><span class="pass" id="passVal">••••••••</span></div>
+        <div class="data-row"><span class="key">2FA:</span><span class="val" style="color:#f00;">BYPASSED</span></div>
+        <div class="data-row"><span class="key">Last Login:</span><span class="val">Just now — from YOUR device 😉</span></div>
+      </div>
+    </div>
+
+    <!-- FINAL REVEAL -->
+    <div id="finalReveal" class="screen">
+      <div class="emoji">😂</div>
+      <h2>PRANKED!</h2>
+      <p>Bhai, kuch bhi hack nahi hua 😄</p>
+      <p>Yeh sirf ek <b>fake UI</b> hai jo mazaak ke liye banaya gaya hai.</p>
+      <p>Tumhari Instagram ID <b style="color:#0f0;">100% SAFE</b> hai.</p>
+      <p class="big">Ab jaake dost ko bhi prank karo 🤝</p>
+      <button class="reset-btn" onclick="location.reload()">🔄 RESTART</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   MATRIX RAIN BACKGROUND
+============================================================ */
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+let columns, drops;
+
+function initMatrix() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const fontSize = 14;
+  columns = canvas.width / fontSize;
+  drops = Array(Math.floor(columns)).fill(1);
+}
+initMatrix();
+window.addEventListener('resize', initMatrix);
+
+const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF';
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.06)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#0f0';
+  ctx.font = '14px monospace';
+  for (let i = 0; i < drops.length; i++) {
+    const text = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillText(text, i * 14, drops[i] * 14);
+    if (drops[i] * 14 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}
+setInterval(drawMatrix, 55);
+
+/* ============================================================
+   LIVE CLOCK
+============================================================ */
+function tickClock() {
+  const now = new Date();
+  const t = now.toTimeString().split(' ')[0];
+  const el = document.getElementById('clock');
+  if (el) el.textContent = t;
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+/* ============================================================
+   TYPING SOUND (Web Audio API - no external file)
+============================================================ */
+let audioCtx;
+function playClick() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = 800 + Math.random() * 400;
+    gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.04);
+  } catch(e) {}
+}
+
+function playBeep(freq, dur) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + dur);
+  } catch(e) {}
+}
+
+/* ============================================================
+   ELEMENTS
+============================================================ */
+const inputScreen   = document.getElementById('inputScreen');
+const hackScreen    = document.getElementById('hackScreen');
+const profileReveal = document.getElementById('profileReveal');
+const finalReveal   = document.getElementById('finalReveal');
+const terminal      = document.getElementById('terminal');
+const progressFill  = document.getElementById('progressFill');
+const progressText  = document.getElementById('progressText');
+const phaseName     = document.getElementById('phaseName');
+const startBtn      = document.getElementById('startBtn');
+const usernameInput = document.getElementById('username');
+const photoInput    = document.getElementById('photo');
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ============================================================
+   LOG HELPERS
+============================================================ */
+function addLog(text, type = 'info') {
+  const div = document.createElement('div');
+  div.className = 'log ' + type;
+  div.textContent = text;
+  terminal.appendChild(div);
+  terminal.scrollTop = terminal.scrollHeight;
+  playClick();
+}
+
+async function typeLog(text, type = 'info', speed = 18) {
+  const div = document.createElement('div');
+  div.className = 'log ' + type + ' cursor';
+  terminal.appendChild(div);
+  for (let i = 0; i < text.length; i++) {
+    div.textContent += text[i];
+    terminal.scrollTop = terminal.scrollHeight;
+    if (i % 2 === 0) playClick();
+    await sleep(speed);
+  }
+  div.classList.remove('cursor');
+}
+
+/* ============================================================
+   PROGRESS
+============================================================ */
+function setProgress(pct, phase) {
+  progressFill.style.width = pct + '%';
+  progressText.textContent = pct + '%';
+  if (phase) phaseName.textContent = phase;
+}
+
+/* ============================================================
+   RANDOM DATA GENERATOR
+============================================================ */
+const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const randomFrom = arr => arr[Math.floor(Math.random() * arr.length)];
+
+/* ============================================================
+   FAKE HACK SCRIPT (multi-phase)
+============================================================ */
+const PHASES = [
+  {
+    name: 'PHASE 1: RECONNAISSANCE',
+    logs: [
+      { t: '> Initializing Instagram Hacker Pro v7.3...', c: 'info' },
+      { t: '> Loading 47 exploit modules...', c: 'info' },
+      { t: '> Spoofing MAC address: ' + randMac(), c: 'warn' },
+      { t: '> Routing through 7 proxy nodes [TOR active]', c: 'info' },
+      { t: '  ├─ Node: 185.220.101.' + rand(1,254) + ' 🇩🇪', c: 'info' },
+      { t: '  ├─ Node: 199.87.154.' + rand(1,254) + ' 🇺🇸', c: 'info' },
+      { t: '  └─ Node: 51.15.43.' + rand(1,254) + ' 🇳🇱', c: 'info' },
+      { t: '> Pinging instagram.com...', c: 'info' },
+      { t: '✔ Response: 12ms — Target reachable', c: 'ok' },
+      { t: '> Fetching target metadata...', c: 'info' },
+      { t: '✔ Public data harvested', c: 'ok' },
+    ]
+  },
+  {
+    name: 'PHASE 2: EXPLOITATION',
+    logs: [
+      { t: '> Scanning for vulnerabilities...', c: 'info' },
+      { t: '  ├─ CVE-2024-1337 ..... VULNERABLE', c: 'err' },
+      { t: '  ├─ CVE-2024-2048 ..... PATCHED', c: 'warn' },
+      { t: '  └─ CVE-2024-9999 ..... VULNERABLE', c: 'err' },
+      { t: '> Injecting SQL payload into login endpoint...', c: 'info' },
+      { t: "  ' OR '1'='1' -- ", c: 'warn' },
+      { t: '✔ Database entry located', c: 'ok' },
+      { t: '> Dumping user table...', c: 'info' },
+      { t: '✔ 1 record extracted', c: 'ok' },
+      { t: '> Extracting password hash (bcrypt $2b$12$)...', c: 'info' },
+      { t: '  $2b$12$' + randHash(), c: 'warn' },
+      { t: '> Launching dictionary attack...', c: 'info' },
+      { t: '  ├─ 123456 ......... ✗', c: 'err' },
+      { t: '  ├─ password ....... ✗', c: 'err' },
+      { t: '  ├─ qwerty123 ...... ✗', c: 'err' },
+      { t: '  ├─ iloveyou ....... ✗', c: 'err' },
+      { t: '  └─ insta@2024 ..... ✔ MATCH', c: 'ok' },
+      { t: '✔ Hash cracked in 3.7s', c: 'ok' },
+    ]
+  },
+  {
+    name: 'PHASE 3: ACCESS & EXFIL',
+    logs: [
+      { t: '> Bypassing 2FA (SMS interception)...', c: 'info' },
+      { t: '✔ 2FA bypassed', c: 'ok' },
+      { t: '> Generating session token...', c: 'info' },
+      { t: '  token: ' + randHash(24), c: 'warn' },
+      { t: '✔ Login token generated', c: 'ok' },
+      { t: '> Accessing private messages...', c: 'info' },
+      { t: '✔ DM archive downloaded (' + rand(120, 980) + ' chats)', c: 'ok' },
+      { t: '> Downloading followers list...', c: 'info' },
+      { t: '✔ Complete', c: 'ok' },
+      { t: '> Extracting saved payment methods...', c: 'info' },
+      { t: '⚠ WARNING: Account access FULLY GRANTED', c: 'critical' },
+    ]
+  },
+];
+
+function randMac() {
+  return Array(6).fill(0).map(() => rand(0,255).toString(16).padStart(2,'0')).join(':').toUpperCase();
+}
+function randHash(len = 40) {
+  const c = 'abcdef0123456789$./ABCDEF';
+  return Array(len).fill(0).map(() => c[rand(0, c.length-1)]).join('');
+}
+
+/* ============================================================
+   MAIN HACK FLOW
+============================================================ */
+let targetUser = '';
+let targetPhoto = '';
+
+photoInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { targetPhoto = ev.target.result; };
+  reader.readAsDataURL(file);
+});
+
+startBtn.addEventListener('click', startHack);
+usernameInput.addEventListener('keypress', e => {
+  if (e.key === 'Enter') startHack();
+});
+
+async function startHack() {
+  targetUser = (usernameInput.value.trim() || 'target_user').replace('@','');
+
+  inputScreen.classList.remove('active');
+  hackScreen.classList.add('active');
+
+  // Run all phases
+  let totalLogs = PHASES.reduce((a, p) => a + p.logs.length, 0);
+  let done = 0;
+
+  for (const phase of PHASES) {
+    setProgress(Math.floor((done/totalLogs)*100), phase.name);
+    addLog('', 'info');
+    await typeLog('═══ ' + phase.name + ' ═══', 'warn', 10);
+    await sleep(400);
+
+    for (const log of phase.logs) {
+      await typeLog(log.t, log.c, log.c === 'critical' ? 8 : 14);
+      await sleep(log.c === 'critical' ? 700 : 180);
+      done++;
+      setProgress(Math.floor((done/totalLogs)*100));
+    }
+    await sleep(500);
+  }
+
+  // Final access
+  setProgress(100, 'ACCESS GRANTED');
+  await typeLog('> Target @' + targetUser + ' fully compromised.', 'ok', 12);
+  playBeep(1200, 0.3);
+  await sleep(600);
+
+  // Red flash
+  const flash = document.createElement('div');
+  flash.className = 'flash-red';
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 600);
+
+  playBeep(300, 0.5);
+  await sleep(1400);
+
+  // Move to profile reveal
+  hackScreen.classList.remove('active');
+  profileReveal.classList.add('active');
+
+  // Populate fake data
+  document.getElementById('revealUser').textContent = '@' + targetUser;
+
+  if (targetPhoto) {
+    document.getElementById('profilePic').innerHTML = '<img src="' + targetPhoto + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+  }
+
+  const followers = rand(180, 4800);
+  const following = rand(90, 1800);
+  const posts = rand(12, 340);
+
+  animateNumber('followers', followers);
+  animateNumber('following', following);
+  animateNumber('posts', posts);
+
+  document.getElementById('emailVal').textContent = targetUser + rand(10,99) + '@gmail.com';
+  document.getElementById('phoneVal').textContent = '+91 ' + rand(70000, 99999) + rand(10000, 99999);
+  document.getElementById('passVal').textContent = 'insta@' + rand(1000, 9999);
+
+  await sleep(5000);
+
+  // Final PRANK reveal
+  profileReveal.classList.remove('active');
+  finalReveal.classList.add('active');
+  playBeep(880, 0.4);
+  setTimeout(() => playBeep(1320, 0.4), 200);
+}
+
+function animateNumber(id, target) {
+  const el = document.getElementById(id);
+  let current = 0;
+  const step = Math.ceil(target / 40);
+  const timer = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(timer); }
+    el.textContent = current.toLocaleString();
+  }, 40);
+}
+</script>
+</body>
+</html>
